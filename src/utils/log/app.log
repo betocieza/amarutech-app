@@ -21,3 +21,4 @@ decouple.UndefinedValueError: POSTGRES_HOST not found. Declare it as envvar or d
          ^^^^^^^^^^^^^^^^^
 AttributeError: 'NoneType' object has no attribute 'cursor'
 
+2024-02-11 13:58:30 | INFO | GET /
