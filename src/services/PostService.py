@@ -53,7 +53,7 @@ class PostService():
             connection = get_connection()                   
             with connection.cursor() as cursor:
                 query = """INSERT INTO posts (title, slug, description,image_url,author_id,published, created_at, updated_at) 
-                VALUES ('{0}', '{1}', '{2}' ,'{3}', '{4}' ,'{5}', '{6}','{7}','{8}')""".format(post.title, post.slug, post.description,post.image_url, post.author_id, post.published,post.created_at, post.updated_at)
+                VALUES ('{0}', '{1}', '{2}' ,'{3}', '{4}' ,'{5}', '{6}','{7}')""".format(post.title, post.slug, post.description,post.image_url, post.author_id, post.published,post.created_at, post.updated_at)
                 print(query)
                 cursor.execute(query)
                 connection.commit()                                    
