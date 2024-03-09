@@ -12,20 +12,30 @@ main = Blueprint('post_blueprint', __name__)
 
 @main.route('/all', methods=['GET'])
 def get_posts(): 
-    has_access = Security.verify_token(request.headers)
+
+    try:
+        posts = PostService.get_posts()
+        if (len(posts) > 0):
+            return jsonify(posts)
+        else:
+            return jsonify({'message': "NOTFOUND", 'success': True})
+    except Exception as ex:
+        return jsonify({'message': "ERROR", 'success': False})
+
+    #has_access = Security.verify_token(request.headers)
    
-    if has_access:
-        try:
-            posts = PostService.get_posts()
-            if (len(posts) > 0):
-                return jsonify(posts)
-            else:
-                return jsonify({'message': "NOTFOUND", 'success': True})
-        except Exception as ex:
-            return jsonify({'message': "ERROR", 'success': False})
-    else:
-        response = jsonify({'message': 'Unauthorized'})
-        return response, 401
+    #if has_access:
+    #    try:
+    #        posts = PostService.get_posts()
+    #        if (len(posts) > 0):
+    #            return jsonify(posts)
+    #        else:
+    #            return jsonify({'message': "NOTFOUND", 'success': True})
+    #    except Exception as ex:
+    #        return jsonify({'message': "ERROR", 'success': False})
+   # else:
+     #   response = jsonify({'message': 'Unauthorized'})
+    #    return response, 401
     
 
 @main.route('/<post_id>', methods=['GET'])
