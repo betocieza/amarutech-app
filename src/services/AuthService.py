@@ -2,7 +2,7 @@ import traceback
 from werkzeug.security import check_password_hash
 
 # Database
-from src.database.db_connection_mysql import get_connection
+from src.database.db_connection import get_connection
 # Logger
 from src.utils.Logger import Logger
 # Models
