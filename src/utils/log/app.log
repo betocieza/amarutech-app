@@ -1,3 +1,59 @@
 
+2024-03-09 20:28:13 | ERROR | connection failed: could not receive data from server: Socket is not connected (0x00002749/10057)
+could not send SSL negotiation packet: Socket is not connected (0x00002749/10057)
+2024-03-09 20:28:13 | ERROR | Traceback (most recent call last):
+  File "D:\python\amarutech-app\src\database\db_connection_mysql.py", line 12, in get_connection
+    return psycopg.connect(
+  File "D:\python\amarutech-app\venv\lib\site-packages\psycopg\connection.py", line 748, in connect
+    raise last_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: could not receive data from server: Socket is not connected (0x00002749/10057)
+could not send SSL negotiation packet: Socket is not connected (0x00002749/10057)
 
+2024-03-09 20:28:13 | ERROR | 'NoneType' object has no attribute 'cursor'
+2024-03-09 20:28:13 | ERROR | Traceback (most recent call last):
+  File "D:\python\amarutech-app\src\services\PostService.py", line 17, in get_posts
+    with connection.cursor() as cursor:
+AttributeError: 'NoneType' object has no attribute 'cursor'
+
+2024-03-09 20:34:55 | ERROR | POSTGRES_PORT not found. Declare it as envvar or define a default value.
+2024-03-09 20:34:55 | ERROR | Traceback (most recent call last):
+  File "D:\python\amarutech-app\src\database\db_connection_mysql.py", line 17, in get_connection
+    port=config('POSTGRES_PORT')
+  File "D:\python\amarutech-app\venv\lib\site-packages\decouple.py", line 248, in __call__
+    return self.config(*args, **kwargs)
+  File "D:\python\amarutech-app\venv\lib\site-packages\decouple.py", line 107, in __call__
+    return self.get(*args, **kwargs)
+  File "D:\python\amarutech-app\venv\lib\site-packages\decouple.py", line 92, in get
+    raise UndefinedValueError('{} not found. Declare it as envvar or define a default value.'.format(option))
+decouple.UndefinedValueError: POSTGRES_PORT not found. Declare it as envvar or define a default value.
+
+2024-03-09 20:34:55 | ERROR | 'NoneType' object has no attribute 'cursor'
+2024-03-09 20:34:55 | ERROR | Traceback (most recent call last):
+  File "D:\python\amarutech-app\src\services\PostService.py", line 17, in get_posts
+    with connection.cursor() as cursor:
+AttributeError: 'NoneType' object has no attribute 'cursor'
+
+2024-03-09 20:34:57 | ERROR | POSTGRES_PORT not found. Declare it as envvar or define a default value.
+2024-03-09 20:34:57 | ERROR | Traceback (most recent call last):
+  File "D:\python\amarutech-app\src\database\db_connection_mysql.py", line 17, in get_connection
+    port=config('POSTGRES_PORT')
+  File "D:\python\amarutech-app\venv\lib\site-packages\decouple.py", line 248, in __call__
+    return self.config(*args, **kwargs)
+  File "D:\python\amarutech-app\venv\lib\site-packages\decouple.py", line 107, in __call__
+    return self.get(*args, **kwargs)
+  File "D:\python\amarutech-app\venv\lib\site-packages\decouple.py", line 92, in get
+    raise UndefinedValueError('{} not found. Declare it as envvar or define a default value.'.format(option))
+decouple.UndefinedValueError: POSTGRES_PORT not found. Declare it as envvar or define a default value.
+
+2024-03-09 20:34:57 | ERROR | 'NoneType' object has no attribute 'cursor'
+2024-03-09 20:34:57 | ERROR | Traceback (most recent call last):
+  File "D:\python\amarutech-app\src\services\PostService.py", line 17, in get_posts
+    with connection.cursor() as cursor:
+AttributeError: 'NoneType' object has no attribute 'cursor'
+
+2024-03-09 20:36:44 | ERROR | 'str' object has no attribute 'user_id'
+2024-03-09 20:36:44 | ERROR | Traceback (most recent call last):
+  File "D:\python\amarutech-app\src\utils\Security.py", line 23, in generate_token
+    'user_id':authenticated_user.user_id,
+AttributeError: 'str' object has no attribute 'user_id'
 

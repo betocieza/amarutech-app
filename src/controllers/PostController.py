@@ -66,12 +66,12 @@ def add_post():
             slug= request.json['slug']
             description = request.json['description']
             image_url= request.json['image_url'] 
-            author_id= request.json['author_id'] 
+            user_id= request.json['user_id'] 
             published=request.json['published']
             created_at=datetime.datetime.utcnow()
             updated_at= datetime.datetime.utcnow() 
 
-            _post = Post(0,title, slug, description,image_url, author_id,published, created_at, updated_at)            
+            _post = Post(0,title, slug, description,image_url, user_id,published, created_at, updated_at)            
 
             if PostService.savePost(_post):
                 return jsonify("Post add success")
@@ -93,11 +93,11 @@ def update_post(post_id):
             slug= request.json['slug']
             description = request.json['description']
             image_url= request.json['image_url'] 
-            author_id= request.json['author_id'] 
+            user_id= request.json['user_id'] 
             published=request.json['published']
             updated_at= datetime.datetime.utcnow() 
 
-            post = Post(0,title, slug, description,image_url, author_id, published,0, updated_at)             
+            post = Post(0,title, slug, description,image_url, user_id, published,0, updated_at)             
 
             if PostService.updatePost(post_id, post):
                 return jsonify(" success")

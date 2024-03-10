@@ -13,7 +13,8 @@ def get_connection():
             host=config('POSTGRES_HOST'),
             user=config('POSTGRES_USER'),
             password=config('POSTGRES_PASSWORD'),
-            dbname=config('POSTGRES_DATABASE')
+            dbname=config('POSTGRES_DATABASE'),
+            port=config('POSTGRES_PORT')
         )
     except Exception as ex:
         Logger.add_to_log("error", str(ex))
