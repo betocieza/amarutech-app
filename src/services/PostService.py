@@ -8,14 +8,33 @@ from src.models.PostModel import Post
 
 
 class PostService():
-    
+# Methods for front web
+ 
+    @classmethod
+    def get_list_posts(cls):
+        try:
+            connection = get_connection()
+            posts = []
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM posts ORDER BY created_at DESC LIMIT 4")
+                resultset = cursor.fetchall()
+                for row in resultset:
+                    post = Post(int(row[0]), row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8])
+                    posts.append(post.to_json())
+            connection.close()
+            return posts
+        except Exception as ex:
+            Logger.add_to_log("error", str(ex))
+            Logger.add_to_log("error", traceback.format_exc())
+
+# Methods for admin  
     @classmethod
     def get_posts(cls):
         try:
             connection = get_connection()
             posts = []
             with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM posts")
+                cursor.execute("SELECT * FROM posts ORDER BY created_at")
                 resultset = cursor.fetchall()
                 for row in resultset:
                     post = Post(int(row[0]), row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8])

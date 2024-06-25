@@ -12,9 +12,9 @@ def init_app(config):
   
     # Blueprints
     app.register_blueprint(IndexController.main, url_prefix='/')
-    app.register_blueprint(AuthController.main, url_prefix='/auth') 
+    app.register_blueprint(AuthController.main, url_prefix='/api/auth') 
     #app.register_blueprint(UserRoutes.main, url_prefix='/users') 
-    app.register_blueprint(PostController.main, url_prefix='/posts') 
+    app.register_blueprint(PostController.main, url_prefix='/api/posts') 
   
 
     return app
