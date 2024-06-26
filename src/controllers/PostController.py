@@ -20,7 +20,17 @@ def get_list_posts():
             return jsonify({'message': "NOTFOUND", 'success': True})
     except Exception as ex:
         return jsonify({'message': "ERROR", 'success': False})
-   
+
+@main.route('/news', methods=['GET'])
+def get_list_news():  
+    try:
+        news = PostService.get_list_news()
+        if (len(news) > 0):
+            return jsonify(news)
+        else:
+            return jsonify({'message': "NOTFOUND", 'success': True})
+    except Exception as ex:
+        return jsonify({'message': "ERROR", 'success': False}) 
 
 @main.route('/all', methods=['GET'])
 def get_posts():   
@@ -65,14 +75,15 @@ def add_post():
             title= request.json['title']
             slug= request.json['slug']
             description = request.json['description']
-            image_url= request.json['image_url'] 
+            image_url= request.json['image_url']
+            category_id= request.json['category_id']  
            # user_id= request.json['user_id'] 
             user_id =1
             published=request.json['published']
             created_at=datetime.datetime.utcnow()
             updated_at= datetime.datetime.utcnow() 
 
-            _post = Post(0,title, slug, description,image_url, user_id,published, created_at, updated_at)            
+            _post = Post(0,title, slug, description,image_url, category_id, user_id,published, created_at, updated_at)            
 
             if PostService.savePost(_post):
                 return jsonify({'message':"Post add success",'success': True})
@@ -94,11 +105,12 @@ def update_post(post_id):
             slug= request.json['slug']
             description = request.json['description']
             image_url= request.json['image_url'] 
+            category_id = request.json['categroy_id']
             user_id= 1 
             published=request.json['published']
             updated_at= datetime.datetime.utcnow() 
 
-            post = Post(0,title, slug, description,image_url, user_id, published,0, updated_at)             
+            post = Post(0,title, slug, description,image_url,category_id, user_id, published,0, updated_at)             
 
             if PostService.updatePost(post_id, post):
                 return jsonify({'message':"Post updated success",'success': True})
