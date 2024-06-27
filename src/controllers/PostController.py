@@ -105,7 +105,7 @@ def update_post(post_id):
             slug= request.json['slug']
             description = request.json['description']
             image_url= request.json['image_url'] 
-            category_id = request.json['categroy_id']
+            category_id = request.json['category_id']
             user_id= 1 
             published=request.json['published']
             updated_at= datetime.datetime.utcnow() 

@@ -108,7 +108,7 @@ class PostService():
             connection = get_connection()            
             with connection.cursor() as cursor:
                 query = """UPDATE posts SET title = '{0}',slug = '{1}',description = '{2}',image_url='{3}', category_id='{4}',user_id='{5}', published='{6}',updated_at='{7}'
-                            WHERE post_id= '{7}'""".format(post.title, post.slug,post.description,post.image_url,post.category_id,post.user_id,post.published,post.updated_at, post_id)
+                            WHERE post_id= '{8}'""".format(post.title, post.slug,post.description,post.image_url,post.category_id,post.user_id,post.published,post.updated_at, post_id)
                 
                 cursor.execute(query)
                 connection.commit()                                    

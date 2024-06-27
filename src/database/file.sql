@@ -29,3 +29,7 @@ CREATE TABLE posts
     updated_at timestamp,
     PRIMARY KEY (post_id)
 );
+
+INSERT INTO public.posts(title,slug,description,image_url,category_id, user_id, published, created_at, updated_at)
+	VALUES ('Eyediagnose:Sistema de deteccion de retinopatia diabetica', 'eyediagnose-sistema-retinopatia', 'sss', 'assets/images/posts/i.png', 1,1,true,'Wed, 26 Jun 2024 16:41:33 GMT','Wed, 26 Jun 2024 16:41:33 GMT');
+UPDATE posts SET image_url='https://amarutech-files.s3.us-west-002.backblazeb2.com/eyediagnose.png' WHERE post_id=1;
