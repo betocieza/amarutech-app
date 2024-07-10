@@ -1,6 +1,6 @@
 from config import config
 #from decouple import config
-import b2sdk.v2 as b2
+#import b2sdk.v2 as b2
 from src import init_app
 from flask_cors import CORS
 #info = b2.InMemoryAccountInfo()
