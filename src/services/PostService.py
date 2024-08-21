@@ -4,7 +4,7 @@ from src.database.db_connection import get_connection
 # Logger
 from src.utils.Logger import Logger
 # Models
-from src.models.PostModel import Post
+from src.models.PostModel import Post, PostCategory, PostMonth
 
 
 class PostService():
@@ -46,6 +46,40 @@ class PostService():
             Logger.add_to_log("error", traceback.format_exc())
 
 # Methods for admin  
+    @classmethod
+    def get_posts_by_month(cls):
+        try:
+            connection = get_connection()
+            posts = []
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT to_char(created_at,'MON') AS monthName,COUNT(*) AS numberPosts FROM posts GROUP BY to_char(created_at,'MON') ORDER BY to_char(created_at,'MON') ASC")
+                resultset = cursor.fetchall()
+                for row in resultset:
+                    post = PostMonth(row[0], row[1])
+                    posts.append(post.to_json())
+            connection.close()
+            return posts
+        except Exception as ex:
+            Logger.add_to_log("error", str(ex))
+            Logger.add_to_log("error", traceback.format_exc())
+
+    @classmethod
+    def get_posts_by_category(cls):
+        try:
+            connection = get_connection()
+            posts = []
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT category_id as category, count(*) as numberPost from posts group by category_id")
+                resultset = cursor.fetchall()
+                for row in resultset:
+                    post = PostCategory(row[0], row[1])
+                    posts.append(post.to_json())
+            connection.close()
+            return posts
+        except Exception as ex:
+            Logger.add_to_log("error", str(ex))
+            Logger.add_to_log("error", traceback.format_exc())
+
     @classmethod
     def get_posts(cls):
         try:
@@ -91,7 +125,6 @@ class PostService():
             with connection.cursor() as cursor:
                 query = """INSERT INTO posts (title, slug, description,image_url,category_id,user_id,published, created_at, updated_at) 
                 VALUES ('{0}', '{1}', '{2}' ,'{3}', '{4}' ,'{5}', '{6}','{7}','{8}')""".format(post.title, post.slug, post.description,post.image_url, post.category_id, post.user_id, post.published,post.created_at, post.updated_at)
-                print(query)
                 cursor.execute(query)
                 connection.commit()                                    
             connection.close()

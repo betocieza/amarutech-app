@@ -25,3 +25,29 @@ class Post():
            'created_at' : self.created_at,
            'updated_at': self.updated_at
         } 
+class PostMonth():
+
+    def __init__(self, monthName, numberPosts) -> None:
+        self.monthName = monthName
+        self.numberPosts = numberPosts
+     
+
+    def to_json(self):
+        return {        
+           'monthName': self.monthName ,
+           'numberPosts':self.numberPosts,
+         
+        } 
+class PostCategory():
+
+    def __init__(self, category_id, numberPostsByCategory) -> None:
+        self.category_id = category_id
+        self.numberPostsByCategory = numberPostsByCategory
+     
+
+    def to_json(self):
+        return {        
+           'category_id': self.category_id ,
+           'numberPostsByCategory':self.numberPostsByCategory,
+         
+        } 
