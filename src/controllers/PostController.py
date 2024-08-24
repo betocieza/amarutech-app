@@ -3,7 +3,7 @@ import traceback
 from flask import Blueprint, request, jsonify
 from src.models.PostModel import Post
 from src.database.b2_connection import bucket
-
+from werkzeug.utils import secure_filename
 import datetime
 
 # Security
@@ -102,34 +102,35 @@ def get_post_by_id(post_id):
         response = jsonify({'message': 'Unauthorized'})
         return response, 401
      
+@main.route('/upload', methods=['POST'])
+def  upload_file():
+    try:
+        file= request.files['file']
+        image=file.read()
+        file_name =file.filename
+        
+        response=bucket.upload_bytes(data_bytes=image,file_name=file_name)
+        response = response.as_dict()
+        url= bucket.get_download_url(response.get("fileName"))
+        print(url)
+        return "Upload successfuly"
+    except Exception as ex:
+            Logger.add_to_log("error", str(ex))
+            Logger.add_to_log("error", traceback.format_exc())
+            return jsonify({'message': "Error in server", 'success': False})
+
 @main.route('/create', methods=['POST'])
 def add_post():
      has_access = Security.verify_token(request.headers) 
-    
-    #img= request.files['image']
-     #   image= img.read()
-     #   filename=img.filename
-      #  print(filename)
-      #  bucket.upload_bytes(data_bytes=image, file_name=filename)
-            #response.as_dict()
-    
-     
      if has_access:
         try:
              
             title= request.json['title']
             slug= request.json['slug']
             description = request.json['description']
-            
-            file_name = "captura.png"
-            file = Path(file_name).resolve()
-            response=bucket.upload_local_file(local_file=file,file_name=file_name)
-            response = response.as_dict()
-
           
-            #file = image.read()
-
-            image_url= bucket.get_download_url(response.get("fileName"))
+           
+            image_url= "gggg"
             
             category_id= request.json['category_id']  
            # user_id= request.json['user_id'] 
