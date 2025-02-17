@@ -7,6 +7,7 @@ from werkzeug.utils import secure_filename
 import datetime
 
 # Security
+from src.services.UploadImage import upload_to_backblaze
 from src.utils.Logger import Logger
 from src.utils.Security import Security
 # Services
@@ -18,6 +19,7 @@ main = Blueprint('post_blueprint', __name__)
 def get_list_posts():  
     try:
         posts = PostService.get_list_posts()
+      
         if (len(posts) > 0):
             return jsonify(posts)
         else:
@@ -124,22 +126,24 @@ def add_post():
      has_access = Security.verify_token(request.headers) 
      if has_access:
         try:
-             
-            title= request.json['title']
-            slug= request.json['slug']
-            description = request.json['description']
-          
-           
-            image_url= "gggg"
             
-            category_id= request.json['category_id']  
-           # user_id= request.json['user_id'] 
-            user_id =1
-            published=request.json['published']
-            created_at=datetime.datetime.utcnow()
-            updated_at= datetime.datetime.utcnow() 
+            title = request.form.get('title')
+            slug = request.form.get('slug')
+            description = request.form.get('description')
+            category_id = request.form.get('category_id',1)
+            user_id = 1  # Se puede cambiar por el usuario autenticado
+            published = request.form.get('published', 'false').lower() == 'true'
+            created_at = datetime.datetime.utcnow()
+            updated_at = datetime.datetime.utcnow()          
+             # Verificar si se envió un archivo
+            image_url = None
+            if 'image' in request.files:
+                image_file = request.files['image']
+                image_url = upload_to_backblaze(image_file)
 
-            _post = Post(0,title, slug, description,image_url, category_id, user_id,published, created_at, updated_at)            
+                if not image_url:
+                    return jsonify({'message': 'Error al subir la imagen', 'success': False}), 500
+            _post = Post(0,title, slug, description,category_id, user_id,published, created_at, updated_at,image_url)            
 
             if PostService.savePost(_post):
                 return jsonify({'message':"Post add success",'success': True})

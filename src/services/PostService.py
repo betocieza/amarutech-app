@@ -19,7 +19,7 @@ class PostService():
                 cursor.execute("SELECT * FROM posts WHERE published= true AND category_id=1 ORDER BY created_at DESC LIMIT 4")
                 resultset = cursor.fetchall()
                 for row in resultset:
-                    post = Post(int(row[0]), row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9])
+                    post = Post(int(row[0]), row[1],row[2],row[3],row[5],row[6],row[7],row[8],row[9],row[4])
                     posts.append(post.to_json())
             connection.close()
             return posts

@@ -1,30 +1,34 @@
-class Post():
+from dataclasses import dataclass
+from typing import Optional
+import datetime
 
-    def __init__(self, post_id, title, slug, description,image_url, category_id,user_id,published, created_at, updated_at) -> None:
-        self.post_id = post_id
-        self.title = title
-        self.slug = slug
-        self.description = description
-        self.image_url = image_url
-        self.category_id= category_id
-        self.user_id = user_id       
-        self.published = published
-        self.created_at = created_at
-        self.updated_at = updated_at
+@dataclass
+class Post:
+    post_id: Optional[int]
+    title: str
+    slug: str
+    description: str    
+    category_id: int
+    user_id: int
+    published: bool
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+    image_url: Optional[str] = None  # Puede ser None si no hay imagen
 
     def to_json(self):
         return {        
-           'post_id': self.post_id ,
-           'title':self.title,
-           'slug': self.slug,
-           'description':self.description,
-           'image_url':self.image_url,
-           'category_id':self.category_id,
-           'user_id':self.user_id,
-           'published': self.published,
-           'created_at' : self.created_at,
-           'updated_at': self.updated_at
-        } 
+            'post_id': self.post_id,
+            'title': self.title,
+            'slug': self.slug,
+            'description': self.description,                     
+            'category_id': self.category_id,
+            'user_id': self.user_id,
+            'published': self.published,
+            'created_at': self.created_at.isoformat() if isinstance(self.created_at, datetime.datetime) else None,
+            'updated_at': self.updated_at.isoformat() if isinstance(self.updated_at, datetime.datetime) else None,
+            'image_url': self.image_url ,  
+           
+        }
 class PostMonth():
 
     def __init__(self, monthName, numberPosts) -> None:
