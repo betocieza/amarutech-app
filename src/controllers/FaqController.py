@@ -102,7 +102,7 @@ def get_faq_by_id(faq_id):
             'success': False
         }), 500
 
-@main.route('/', methods=['POST'])
+@main.route('/create', methods=['POST'])
 def create_faq():
     """Crear una nueva FAQ"""
     try:
@@ -152,7 +152,7 @@ def create_faq():
             'success': False
         }), 500
 
-@main.route('/<int:faq_id>', methods=['PUT'])
+@main.route('/update/<int:faq_id>', methods=['PUT'])
 def update_faq(faq_id):
     """Actualizar una FAQ existente"""
     try:
