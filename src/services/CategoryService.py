@@ -1,10 +1,11 @@
 import traceback
-# Database
-from src.database.db_connection import get_connection
+# SQLAlchemy
+from src.models.CategoryEntity import CategoryEntity
+from src.database import db
 # Logger
 from src.utils.Logger import Logger
 # Models
-from src.models.CategoryModel import Category
+from src.models.CategoryEntity import Category
 
 
 class CategoryService():
@@ -13,71 +14,65 @@ class CategoryService():
     @classmethod
     def get_categories(cls):
         try:
-            connection = get_connection()
             categories = []
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM categories ORDER BY created_at")
-                resultset = cursor.fetchall()
-                for row in resultset:
-                    category = Category(int(row[0]), row[1],row[2],row[3])
-                    categories.append(category.to_json())
-            connection.close()
+            # Obtener todas las categorías ordenadas por fecha de creación
+            category_entities = CategoryEntity.query.order_by(CategoryEntity.created_at).all()
+            
+            for category_entity in category_entities:
+                category = Category(
+                    category_id=category_entity.category_id,
+                    name=category_entity.name,
+                    created_at=category_entity.created_at,
+                    updated_at=category_entity.updated_at
+                )
+                categories.append(category.to_json())
             return categories
         except Exception as ex:
             Logger.add_to_log("error", str(ex))
             Logger.add_to_log("error", traceback.format_exc())
-
-
+            return []
 
     @classmethod
-    def getPostById(cls,post_id):
+    def getCategoryById(cls, category_id):
         try:
-            connection = get_connection()   
-           # Post = []        
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM posts WHERE post_id = '{0}'".format(post_id))
-                data = cursor.fetchone()              
-                if data!=None:
-                    post = {'post_id':data[0],'title':data[1],'slug':data[2],'description':data[3],'image_url':data[4],'category_id':data[5],'user_id':data[6],'published':data[7],'created_at':data[8],'updated_at':data[9]} 
-                                      
-            connection.close()
-            return post
-        
+            category_entity = CategoryEntity.query.get(category_id)
+            if category_entity:
+                return category_entity.to_dict()
+            return None
         except Exception as ex:
             Logger.add_to_log("error", str(ex))
             Logger.add_to_log("error", traceback.format_exc())
+            return None
     
-    # Method for insert new Post
+    # Method for insert new Category
     @classmethod
     def saveCategory(cls, category):
         try:
-            connection = get_connection()                   
-            with connection.cursor() as cursor:
-                query = """INSERT INTO categories (name, created_at, updated_at) 
-                VALUES ('{0}', '{1}', '{2}' )""".format(category.name, category.created_at, category.updated_at)
-                cursor.execute(query)
-                connection.commit()                                    
-            connection.close()
-            return "Category add sucess"
-        
+            new_category = CategoryEntity(
+                name=category.name
+            )
+            db.session.add(new_category)
+            db.session.commit()
+            return "Category add success"
         except Exception as ex:
+            db.session.rollback()
             Logger.add_to_log("error", str(ex))
             Logger.add_to_log("error", traceback.format_exc())
+            return "Error adding category"
 
-    # Method for update Post
+    # Method for update Category
     @classmethod
     def updateCategory(cls, category_id, category):
-        try:       
-            connection = get_connection()            
-            with connection.cursor() as cursor:
-                query = """UPDATE categories SET name = '{0}',updated_at='{1}'
-                            WHERE category_id= '{2}'""".format(category.name, category.updated_at, category_id)
+        try:
+            category_entity = CategoryEntity.query.get(category_id)
+            if category_entity:
+                category_entity.name = category.name
                 
-                cursor.execute(query)
-                connection.commit()                                    
-            connection.close()
-            return "Post updated sucess"
-        
+                db.session.commit()
+                return "Category updated successfully"
+            return "Category not found"
         except Exception as ex:
+            db.session.rollback()
             Logger.add_to_log("error", str(ex))
             Logger.add_to_log("error", traceback.format_exc())
+            return "Error updating category"

@@ -1,10 +1,11 @@
 import traceback
-# Database
-from src.database.db_connection import get_connection
+# SQLAlchemy
+from src.models.SliderEntity import SliderEntity
+from src.database import db
 # Logger
 from src.utils.Logger import Logger
 # Models
-from src.models.SliderModel import Slider
+from src.models.SliderEntity import Slider
 
 
 class SliderService():
@@ -13,92 +14,109 @@ class SliderService():
     @classmethod
     def get_list_sliders(cls):
         try:
-            connection = get_connection()
             sliders = []
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM sliders WHERE published= true AND category_id=1 ORDER BY created_at DESC LIMIT 4")
-                resultset = cursor.fetchall()
-                for row in resultset:
-                    slider = slider(int(row[0]), row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9])
-                    sliders.append(slider.to_json())
-            connection.close()
+            # Obtener sliders publicados ordenados por sort_order y fecha
+            slider_entities = SliderEntity.query.filter_by(
+                published=True
+            ).order_by(SliderEntity.sort_order.asc(), SliderEntity.created_at.desc()).limit(4).all()
+            
+            for slider_entity in slider_entities:
+                slider = Slider(
+                    slider_id=slider_entity.slider_id,
+                    title=slider_entity.title,
+                    subtitle=slider_entity.subtitle,
+                    link=slider_entity.link,
+                    image_url=slider_entity.image_url,
+                    published=slider_entity.published,
+                    sort_order=slider_entity.sort_order,
+                    created_at=slider_entity.created_at,
+                    updated_at=slider_entity.updated_at
+                )
+                sliders.append(slider.to_json())
             return sliders
         except Exception as ex:
             Logger.add_to_log("error", str(ex))
             Logger.add_to_log("error", traceback.format_exc())
-
-
-
+            return []
 
 # Methods for admin  
     @classmethod
     def get_sliders(cls):
         try:
-            connection = get_connection()
             sliders = []
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM sliders ORDER BY created_at")
-                resultset = cursor.fetchall()
-                for row in resultset:
-                    slider = Slider(int(row[0]), row[1],row[2],row[3],row[4],row[5],row[6],row[7])
-                    sliders.append(slider.to_json())
-            connection.close()
+            # Obtener todos los sliders ordenados por sort_order y fecha de creación
+            slider_entities = SliderEntity.query.order_by(SliderEntity.sort_order.asc(), SliderEntity.created_at.desc()).all()
+            
+            for slider_entity in slider_entities:
+                slider = Slider(
+                    slider_id=slider_entity.slider_id,
+                    title=slider_entity.title,
+                    subtitle=slider_entity.subtitle,
+                    link=slider_entity.link,
+                    image_url=slider_entity.image_url,
+                    published=slider_entity.published,
+                    sort_order=slider_entity.sort_order,
+                    created_at=slider_entity.created_at,
+                    updated_at=slider_entity.updated_at
+                )
+                sliders.append(slider.to_json())
             return sliders
         except Exception as ex:
             Logger.add_to_log("error", str(ex))
             Logger.add_to_log("error", traceback.format_exc())
-
-
+            return []
 
     @classmethod
-    def getSliderById(cls,slider_id):
+    def getSliderById(cls, slider_id):
         try:
-            connection = get_connection()   
-           # slider = []        
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM sliders WHERE slider_id = '{0}'".format(slider_id))
-                data = cursor.fetchone()              
-                if data!=None:
-                    slider = {'slider_id':data[0],'title':data[1],'slug':data[2],'description':data[3],'image_url':data[4],'category_id':data[5],'user_id':data[6],'published':data[7],'created_at':data[8],'updated_at':data[9]} 
-                                      
-            connection.close()
-            return slider
-        
+            slider_entity = SliderEntity.query.get(slider_id)
+            if slider_entity:
+                return slider_entity.to_dict()
+            return None
         except Exception as ex:
             Logger.add_to_log("error", str(ex))
             Logger.add_to_log("error", traceback.format_exc())
+            return None
     
-    # Method for insert new slider
+    # Method for insert new Slider
     @classmethod
     def saveSlider(cls, slider):
         try:
-            connection = get_connection()                   
-            with connection.cursor() as cursor:
-                query = """INSERT INTO sliders (title, subtitle, link,image_url,published, created_at, updated_at) 
-                VALUES ('{0}', '{1}', '{2}' ,'{3}', '{4}' ,'{5}', '{6}')""".format(slider.title, slider.subtitle, slider.link,slider.image_url, slider.published,slider.created_at, slider.updated_at)
-                cursor.execute(query)
-                connection.commit()                                    
-            connection.close()
-            return "Slider add sucess"
-        
+            new_slider = SliderEntity(
+                title=slider.title,
+                subtitle=slider.subtitle,
+                link=slider.link,
+                image_url=slider.image_url,
+                published=slider.published,
+                sort_order=getattr(slider, 'sort_order', 0)
+            )
+            db.session.add(new_slider)
+            db.session.commit()
+            return "Slider add success"
         except Exception as ex:
+            db.session.rollback()
             Logger.add_to_log("error", str(ex))
             Logger.add_to_log("error", traceback.format_exc())
+            return "Error adding slider"
 
-    # Method for update slider
+    # Method for update Slider
     @classmethod
     def updateSlider(cls, slider_id, slider):
-        try:       
-            connection = get_connection()            
-            with connection.cursor() as cursor:
-                query = """UPDATE sliders SET title = '{0}',subtitle = '{1}',link = '{2}',image_url='{3}', published='{4}',updated_at='{5}'
-                            WHERE slider_id= '{6}'""".format(slider.title, slider.subtitle,slider.link,slider.image_url,slider.published,slider.updated_at, slider_id)
+        try:
+            slider_entity = SliderEntity.query.get(slider_id)
+            if slider_entity:
+                slider_entity.title = slider.title
+                slider_entity.subtitle = slider.subtitle
+                slider_entity.link = slider.link
+                slider_entity.image_url = slider.image_url
+                slider_entity.published = slider.published
+                slider_entity.sort_order = getattr(slider, 'sort_order', slider_entity.sort_order)
                 
-                cursor.execute(query)
-                connection.commit()                                    
-            connection.close()
-            return "slider updated sucess"
-        
+                db.session.commit()
+                return "Slider updated successfully"
+            return "Slider not found"
         except Exception as ex:
+            db.session.rollback()
             Logger.add_to_log("error", str(ex))
             Logger.add_to_log("error", traceback.format_exc())
+            return "Error updating slider"

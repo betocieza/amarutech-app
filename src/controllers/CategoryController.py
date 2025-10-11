@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from src.models.CategoryModel import Category
+from src.models.CategoryEntity import Category
 
 import datetime
 

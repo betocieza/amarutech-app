@@ -1,12 +1,12 @@
 import traceback
 from werkzeug.security import check_password_hash
 
-# Database
-from src.database.db_connection import get_connection
+# SQLAlchemy
+from src.models.UserEntity import UserEntity
 # Logger
 from src.utils.Logger import Logger
 # Models
-from src.models.UserModel import User
+from src.models.UserEntity import User
 
 
 class AuthService():
@@ -14,24 +14,26 @@ class AuthService():
     @classmethod
     def login_user(cls, user):
         try:
-            connection = get_connection()           
             authenticated_user = None
- 
-            with connection.cursor() as cursor:
-             
-                #query = "SELECT id, username, password, fullname FROM users WHERE username = %s"
-                query = "SELECT user_id,first_name, last_name, email, username, password, enabled FROM users WHERE username = (%s)"
-               
-                cursor.execute(query, (user.username,))
-                row = cursor.fetchone()
-                           
-                if row != None: 
-                    if User.check_password(row[5], user.password):
-                        authenticated_user = User(row[0], row[1],row[2], row[3],row[4],row[5], row[6])                      
-                else:
-                    return "Error em"       
-            connection.close()
+            
+            # Buscar usuario por username usando SQLAlchemy
+            user_entity = UserEntity.query.filter_by(username=user.username).first()
+            
+            if user_entity and user_entity.enabled:
+                # Verificar password usando el método del modelo ORM
+                if user_entity.check_password(user.password):
+                    authenticated_user = User(
+                        user_id=user_entity.user_id,
+                        first_name=user_entity.first_name,
+                        last_name=user_entity.last_name,
+                        email=user_entity.email,
+                        username=user_entity.username,
+                        password=user_entity.password,
+                        enabled=user_entity.enabled
+                    )
+            
             return authenticated_user
         except Exception as ex:
             Logger.add_to_log("error", str(ex))
             Logger.add_to_log("error", traceback.format_exc())
+            return None
