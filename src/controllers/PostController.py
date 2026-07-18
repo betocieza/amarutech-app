@@ -24,6 +24,39 @@ def get_list_posts():
     except Exception as ex:
         return jsonify({'message': "ERROR", 'success': False})
 
+@main.route('/list-all', methods=['GET'])
+def get_projects_paginated():
+    """Endpoint público paginado de proyectos (category_id=1) para la vista de listado completo"""
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 6, type=int)
+
+        result = PostService.get_projects_paginated(page=page, per_page=per_page)
+
+        return jsonify({
+            'success': True,
+            'data': result['posts'],
+            'pagination': result['pagination']
+        })
+    except Exception as ex:
+        Logger.add_to_log("error", str(ex))
+        Logger.add_to_log("error", traceback.format_exc())
+        return jsonify({'message': "Internal server error", 'success': False}), 500
+
+@main.route('/detail/<slug>', methods=['GET'])
+def get_post_by_slug(slug):
+    """Endpoint público de detalle por slug para la vista de detalle de proyecto"""
+    try:
+        post = PostService.getPostBySlug(slug)
+        if post is not None:
+            return jsonify({'success': True, 'data': post})
+        else:
+            return jsonify({'message': "NOTFOUND", 'success': False}), 404
+    except Exception as ex:
+        Logger.add_to_log("error", str(ex))
+        Logger.add_to_log("error", traceback.format_exc())
+        return jsonify({'message': "ERROR", 'success': False}), 500
+
 @main.route('/news', methods=['GET'])
 def get_list_news():  
     try:

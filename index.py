@@ -21,4 +21,4 @@ with app.app_context():
     db.create_all()
 
 if __name__ == '__main__':
-    app.run(debug=(env == 'development'))
+    app.run(debug=(env == 'development'), port=8000)

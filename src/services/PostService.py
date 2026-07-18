@@ -15,14 +15,14 @@ class PostService():
 # Methods for front web
  
     @classmethod
-    def get_list_posts(cls):
+    def get_list_posts(cls, limit=6):
         try:
             posts = []
-            # Obtener posts publicados de categoría 1, ordenados por fecha, límite 4
+            # Obtener posts publicados de categoría 1, ordenados por fecha
             post_entities = PostEntity.query.filter_by(
-                published=True, 
+                published=True,
                 category_id=1
-            ).order_by(PostEntity.created_at.desc()).limit(4).all()
+            ).order_by(PostEntity.created_at.desc()).limit(limit).all()
             
             for post_entity in post_entities:
                 # Manejar tags como lista JSON
@@ -93,7 +93,98 @@ class PostService():
             Logger.add_to_log("error", traceback.format_exc())
             return []
 
-# Methods for admin  
+    @classmethod
+    def get_projects_paginated(cls, page=1, per_page=6):
+        try:
+            page = max(1, int(page)) if page else 1
+            per_page = max(1, min(50, int(per_page))) if per_page else 6
+
+            pagination = PostEntity.query.filter_by(
+                published=True,
+                category_id=1
+            ).order_by(PostEntity.created_at.desc()).paginate(
+                page=page,
+                per_page=per_page,
+                error_out=False
+            )
+
+            posts = []
+            for post_entity in pagination.items:
+                tags = post_entity.tags if post_entity.tags else []
+                if isinstance(tags, str):
+                    try:
+                        tags = json.loads(tags)
+                    except:
+                        tags = []
+
+                post = Post(
+                    post_id=post_entity.post_id,
+                    title=post_entity.title,
+                    slug=post_entity.slug,
+                    description=post_entity.description,
+                    category_id=post_entity.category_id,
+                    user_id=post_entity.user_id,
+                    published=post_entity.published,
+                    created_at=post_entity.created_at,
+                    updated_at=post_entity.updated_at,
+                    image_url=post_entity.image_url,
+                    tags=tags
+                )
+                posts.append(post.to_json())
+
+            return {
+                'posts': posts,
+                'pagination': {
+                    'page': pagination.page,
+                    'per_page': pagination.per_page,
+                    'total': pagination.total,
+                    'pages': pagination.pages,
+                    'has_prev': pagination.has_prev,
+                    'prev_num': pagination.prev_num,
+                    'has_next': pagination.has_next,
+                    'next_num': pagination.next_num
+                }
+            }
+        except Exception as ex:
+            Logger.add_to_log("error", str(ex))
+            Logger.add_to_log("error", traceback.format_exc())
+            return {
+                'posts': [],
+                'pagination': {
+                    'page': 1,
+                    'per_page': per_page,
+                    'total': 0,
+                    'pages': 0,
+                    'has_prev': False,
+                    'prev_num': None,
+                    'has_next': False,
+                    'next_num': None
+                }
+            }
+
+    @classmethod
+    def getPostBySlug(cls, slug):
+        try:
+            post_entity = PostEntity.query.filter_by(slug=slug, published=True).first()
+            if not post_entity:
+                return None
+
+            post_dict = post_entity.to_dict()
+            if post_dict.get('tags'):
+                if isinstance(post_dict['tags'], str):
+                    try:
+                        post_dict['tags'] = json.loads(post_dict['tags'])
+                    except:
+                        post_dict['tags'] = []
+            else:
+                post_dict['tags'] = []
+            return post_dict
+        except Exception as ex:
+            Logger.add_to_log("error", str(ex))
+            Logger.add_to_log("error", traceback.format_exc())
+            return None
+
+# Methods for admin
     @classmethod
     def get_posts_by_month(cls):
         try:

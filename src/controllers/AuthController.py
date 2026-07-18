@@ -1,16 +1,25 @@
 from flask import Blueprint, request, jsonify
+import secrets
 import traceback
+from datetime import datetime, timedelta
+
+from decouple import config
 
 # Logger
 from src.utils.Logger import Logger
 # Models
 from src.models.UserEntity import UserEntity, User
+from src.database import db
 # Security
 from src.utils.Security import Security
 # Services
 from src.services.AuthService import AuthService
+# Mailer
+from src.utils.Mailer import Mailer
 
 main = Blueprint('auth_blueprint', __name__)
+
+RESET_TOKEN_TTL_MINUTES = 60
 
 
 @main.route('/login', methods=['POST'])
@@ -231,6 +240,122 @@ def refresh_token():
         
     except Exception as ex:
         Logger.add_to_log("error", f"Error refrescando token: {str(ex)}")
+        return jsonify({
+            'message': 'Error interno del servidor',
+            'success': False
+        }), 500
+
+
+@main.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    """Genera un token de reseteo y envía el email con el enlace"""
+    try:
+        if not request.is_json:
+            return jsonify({
+                'message': 'Content-Type debe ser application/json',
+                'success': False
+            }), 400
+
+        data = request.get_json()
+        email = (data or {}).get('email', '').strip().lower()
+
+        if not email:
+            return jsonify({
+                'message': 'El email es requerido',
+                'success': False
+            }), 400
+
+        generic_response = {
+            'message': 'Si el email existe, se ha enviado un enlace de recuperación',
+            'success': True
+        }
+
+        user_entity = UserEntity.query.filter_by(email=email).first()
+
+        # Respuesta genérica siempre, para no filtrar qué emails existen
+        if not user_entity or not user_entity.enabled:
+            return jsonify(generic_response), 200
+
+        token = secrets.token_urlsafe(32)
+        user_entity.reset_token = token
+        user_entity.reset_token_expires_at = datetime.utcnow() + timedelta(minutes=RESET_TOKEN_TTL_MINUTES)
+        db.session.commit()
+
+        frontend_url = config('FRONTEND_URL', default='http://localhost:4200')
+        reset_url = f"{frontend_url}/api/auth/reset-password?token={token}"
+
+        sent = Mailer.send_password_reset_email(user_entity.email, reset_url)
+        if not sent:
+            Logger.add_to_log("error", f"No se pudo enviar el email de reseteo a {email}")
+
+        Logger.add_to_log("info", f"Solicitud de reseteo de contraseña para: {email}")
+
+        return jsonify(generic_response), 200
+
+    except Exception as ex:
+        Logger.add_to_log("error", f"Error en forgot-password: {str(ex)}")
+        Logger.add_to_log("error", traceback.format_exc())
+        return jsonify({
+            'message': 'Error interno del servidor',
+            'success': False
+        }), 500
+
+
+@main.route('/reset-password', methods=['POST'])
+def reset_password():
+    """Valida el token de reseteo y establece la nueva contraseña"""
+    try:
+        if not request.is_json:
+            return jsonify({
+                'message': 'Content-Type debe ser application/json',
+                'success': False
+            }), 400
+
+        data = request.get_json()
+        token = (data or {}).get('token', '').strip()
+        new_password = (data or {}).get('password', '')
+
+        if not token or not new_password:
+            return jsonify({
+                'message': 'Token y nueva contraseña son requeridos',
+                'success': False
+            }), 400
+
+        if len(new_password) < 8:
+            return jsonify({
+                'message': 'La contraseña debe tener al menos 8 caracteres',
+                'success': False
+            }), 400
+
+        user_entity = UserEntity.query.filter_by(reset_token=token).first()
+
+        if not user_entity or not user_entity.reset_token_expires_at:
+            return jsonify({
+                'message': 'Enlace de recuperación inválido o expirado',
+                'success': False
+            }), 400
+
+        if datetime.utcnow() > user_entity.reset_token_expires_at:
+            return jsonify({
+                'message': 'Enlace de recuperación inválido o expirado',
+                'success': False
+            }), 400
+
+        user_entity.set_password(new_password)
+        user_entity.reset_token = None
+        user_entity.reset_token_expires_at = None
+        db.session.commit()
+
+        Logger.add_to_log("info", f"Contraseña restablecida para usuario: {user_entity.username}")
+
+        return jsonify({
+            'message': 'Contraseña restablecida exitosamente',
+            'success': True
+        }), 200
+
+    except Exception as ex:
+        Logger.add_to_log("error", f"Error en reset-password: {str(ex)}")
+        Logger.add_to_log("error", traceback.format_exc())
         return jsonify({
             'message': 'Error interno del servidor',
             'success': False
