@@ -19,6 +19,13 @@ from src.models.PostEntity import PostEntity
 from src.models.CategoryEntity import CategoryEntity
 from src.models.SliderEntity import SliderEntity
 from src.models.FaqEntity import FaqEntity
+from src.models.UnitEntity import UnitEntity
+from src.models.TenantEntity import TenantEntity
+from src.models.MeterEntity import MeterEntity
+from src.models.UtilityBillEntity import UtilityBillEntity
+from src.models.MeterReadingEntity import MeterReadingEntity
+from src.models.UnitChargeEntity import UnitChargeEntity
+from src.models.PaymentEntity import PaymentEntity
 
 def create_app():
     """Create Flask app for migrations"""

@@ -244,22 +244,28 @@ def add_post():
                     tags = []
             else:
                 tags = []
-            
+
+            executing_company = request.form.get('executing_company')
+            associated_partner = request.form.get('associated_partner')
+            competitive_fund = request.form.get('competitive_fund')
+            investment_amount = request.form.get('investment_amount')
+
             # Verificar si se envió un archivo de imagen
             image_url = None
             if 'image' in request.files:
                 image_file = request.files['image']
                 upload_result = upload_to_backblaze(image_file)
-                
+
                 if upload_result['success']:
                     image_url = upload_result['file_url']
                 else:
                     return jsonify({
-                        'message': f'Error al subir la imagen: {upload_result["message"]}', 
+                        'message': f'Error al subir la imagen: {upload_result["message"]}',
                         'success': False
                     }), 400
-            
-            _post = Post(0, title, slug, description, category_id, user_id, published, created_at, updated_at, image_url, tags)
+
+            _post = Post(0, title, slug, description, category_id, user_id, published, created_at, updated_at, image_url, tags,
+                         executing_company, associated_partner, competitive_fund, investment_amount)
             
             if PostService.savePost(_post):
                 return jsonify({
@@ -370,9 +376,14 @@ def update_post(post_id):
                 else:
                     tags = []
             
+            executing_company = request.form.get('executing_company', current_post.get('executing_company'))
+            associated_partner = request.form.get('associated_partner', current_post.get('associated_partner'))
+            competitive_fund = request.form.get('competitive_fund', current_post.get('competitive_fund'))
+            investment_amount = request.form.get('investment_amount', current_post.get('investment_amount'))
+
             # Manejar la imagen - puede venir como archivo nuevo o URL existente
             image_url = request.form.get('image_url', current_post.get('image_url'))
-            
+
             # Si se envía una nueva imagen, subirla a B2
             if 'image' in request.files and request.files['image'].filename:
                 image_file = request.files['image']
@@ -387,7 +398,8 @@ def update_post(post_id):
                     }), 400
 
             # Crear objeto Post con todos los valores validados
-            post = Post(0, title.strip(), slug.strip(), description.strip(), category_id, user_id, published, 0, updated_at, image_url, tags)
+            post = Post(0, title.strip(), slug.strip(), description.strip(), category_id, user_id, published, 0, updated_at, image_url, tags,
+                        executing_company, associated_partner, competitive_fund, investment_amount)
 
             if PostService.updatePost(post_id, post):
                 return jsonify({

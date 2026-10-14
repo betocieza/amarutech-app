@@ -5,3 +5,5 @@ __pycache__/
 *.py[cod]
 
 .pytest_cache/
+# Datos locales de Excel (no versionar)
+*.xlsx

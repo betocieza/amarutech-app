@@ -44,7 +44,11 @@ class PostService():
                     created_at=post_entity.created_at,
                     updated_at=post_entity.updated_at,
                     image_url=post_entity.image_url,
-                    tags=tags
+                    tags=tags,
+                    executing_company=post_entity.executing_company,
+                    associated_partner=post_entity.associated_partner,
+                    competitive_fund=post_entity.competitive_fund,
+                    investment_amount=post_entity.investment_amount
                 )
                 posts.append(post.to_json())
             return posts
@@ -84,7 +88,11 @@ class PostService():
                     created_at=post_entity.created_at,
                     updated_at=post_entity.updated_at,
                     image_url=post_entity.image_url,
-                    tags=tags
+                    tags=tags,
+                    executing_company=post_entity.executing_company,
+                    associated_partner=post_entity.associated_partner,
+                    competitive_fund=post_entity.competitive_fund,
+                    investment_amount=post_entity.investment_amount
                 )
                 posts.append(post.to_json())
             return posts
@@ -128,7 +136,11 @@ class PostService():
                     created_at=post_entity.created_at,
                     updated_at=post_entity.updated_at,
                     image_url=post_entity.image_url,
-                    tags=tags
+                    tags=tags,
+                    executing_company=post_entity.executing_company,
+                    associated_partner=post_entity.associated_partner,
+                    competitive_fund=post_entity.competitive_fund,
+                    investment_amount=post_entity.investment_amount
                 )
                 posts.append(post.to_json())
 
@@ -178,6 +190,10 @@ class PostService():
                         post_dict['tags'] = []
             else:
                 post_dict['tags'] = []
+
+            author = post_entity.user
+            post_dict['author_name'] = f"{author.first_name} {author.last_name}".strip() if author else None
+
             return post_dict
         except Exception as ex:
             Logger.add_to_log("error", str(ex))
@@ -267,7 +283,11 @@ class PostService():
                     created_at=post_entity.created_at,
                     updated_at=post_entity.updated_at,
                     image_url=post_entity.image_url,
-                    tags=tags
+                    tags=tags,
+                    executing_company=post_entity.executing_company,
+                    associated_partner=post_entity.associated_partner,
+                    competitive_fund=post_entity.competitive_fund,
+                    investment_amount=post_entity.investment_amount
                 )
                 posts.append(post.to_json())
             
@@ -361,7 +381,11 @@ class PostService():
                 category_id=post.category_id,
                 user_id=post.user_id,
                 published=post.published,
-                tags=tags_json
+                tags=tags_json,
+                executing_company=post.executing_company,
+                associated_partner=post.associated_partner,
+                competitive_fund=post.competitive_fund,
+                investment_amount=post.investment_amount
             )
             db.session.add(new_post)
             db.session.commit()
@@ -409,7 +433,11 @@ class PostService():
             post_entity.category_id = post.category_id
             post_entity.published = post.published
             post_entity.tags = tags_json
-            
+            post_entity.executing_company = post.executing_company
+            post_entity.associated_partner = post.associated_partner
+            post_entity.competitive_fund = post.competitive_fund
+            post_entity.investment_amount = post.investment_amount
+
             # Solo actualizar image_url si se proporciona
             if hasattr(post, 'image_url') and post.image_url is not None:
                 post_entity.image_url = post.image_url

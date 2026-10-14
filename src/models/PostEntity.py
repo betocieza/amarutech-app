@@ -15,9 +15,13 @@ class PostEntity(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     published = db.Column(db.Boolean, default=False)
     tags = db.Column(db.String(255), nullable=True)
+    executing_company = db.Column(db.String(255), nullable=True)
+    associated_partner = db.Column(db.String(255), nullable=True)
+    competitive_fund = db.Column(db.String(255), nullable=True)
+    investment_amount = db.Column(db.String(100), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+
     def to_dict(self):
         return {
             'post_id': self.post_id,
@@ -29,6 +33,10 @@ class PostEntity(db.Model):
             'user_id': self.user_id,
             'published': self.published,
             'tags': self.tags,
+            'executing_company': self.executing_company,
+            'associated_partner': self.associated_partner,
+            'competitive_fund': self.competitive_fund,
+            'investment_amount': self.investment_amount,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
@@ -47,20 +55,28 @@ class Post:
     updated_at: datetime
     image_url: Optional[str] = None  # Puede ser None si no hay imagen
     tags: Optional[List[str]] = None  # Lista de tags
+    executing_company: Optional[str] = None
+    associated_partner: Optional[str] = None
+    competitive_fund: Optional[str] = None
+    investment_amount: Optional[str] = None
 
     def to_json(self):
-        return {        
+        return {
             'post_id': self.post_id,
             'title': self.title,
             'slug': self.slug,
-            'description': self.description,                     
+            'description': self.description,
             'category_id': self.category_id,
             'user_id': self.user_id,
             'published': self.published,
             'created_at': self.created_at.isoformat() if isinstance(self.created_at, datetime) else None,
             'updated_at': self.updated_at.isoformat() if isinstance(self.updated_at, datetime) else None,
             'image_url': self.image_url,
-            'tags': self.tags if self.tags else []
+            'tags': self.tags if self.tags else [],
+            'executing_company': self.executing_company,
+            'associated_partner': self.associated_partner,
+            'competitive_fund': self.competitive_fund,
+            'investment_amount': self.investment_amount
         }
 
 class PostMonth():
