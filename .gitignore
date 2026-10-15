@@ -7,3 +7,6 @@ __pycache__/
 .pytest_cache/
 # Datos locales de Excel (no versionar)
 *.xlsx
+
+# Logs de la app (incluye los app_backup_*.log); .gitkeep mantiene la carpeta que usa Logger
+src/utils/log/*.log
