@@ -12,6 +12,15 @@ from src.services.PostService import PostService
 
 main = Blueprint('post_blueprint', __name__)
 
+
+def parse_year(value):
+    """Año de ejecución desde el formulario: entero razonable o None si viene vacío o inválido."""
+    try:
+        year = int(str(value).strip())
+    except (TypeError, ValueError):
+        return None
+    return year if 1990 <= year <= 2100 else None
+
 @main.route('/list', methods=['GET'])
 def get_list_posts():  
     try:
@@ -249,6 +258,7 @@ def add_post():
             associated_partner = request.form.get('associated_partner')
             competitive_fund = request.form.get('competitive_fund')
             investment_amount = request.form.get('investment_amount')
+            execution_year = parse_year(request.form.get('execution_year'))
 
             # Verificar si se envió un archivo de imagen
             image_url = None
@@ -265,7 +275,7 @@ def add_post():
                     }), 400
 
             _post = Post(0, title, slug, description, category_id, user_id, published, created_at, updated_at, image_url, tags,
-                         executing_company, associated_partner, competitive_fund, investment_amount)
+                         executing_company, associated_partner, competitive_fund, investment_amount, execution_year)
             
             if PostService.savePost(_post):
                 return jsonify({
@@ -380,6 +390,10 @@ def update_post(post_id):
             associated_partner = request.form.get('associated_partner', current_post.get('associated_partner'))
             competitive_fund = request.form.get('competitive_fund', current_post.get('competitive_fund'))
             investment_amount = request.form.get('investment_amount', current_post.get('investment_amount'))
+            if 'execution_year' in request.form:
+                execution_year = parse_year(request.form.get('execution_year'))
+            else:
+                execution_year = current_post.get('execution_year')
 
             # Manejar la imagen - puede venir como archivo nuevo o URL existente
             image_url = request.form.get('image_url', current_post.get('image_url'))
@@ -399,7 +413,7 @@ def update_post(post_id):
 
             # Crear objeto Post con todos los valores validados
             post = Post(0, title.strip(), slug.strip(), description.strip(), category_id, user_id, published, 0, updated_at, image_url, tags,
-                        executing_company, associated_partner, competitive_fund, investment_amount)
+                        executing_company, associated_partner, competitive_fund, investment_amount, execution_year)
 
             if PostService.updatePost(post_id, post):
                 return jsonify({

@@ -19,6 +19,7 @@ class PostEntity(db.Model):
     associated_partner = db.Column(db.String(255), nullable=True)
     competitive_fund = db.Column(db.String(255), nullable=True)
     investment_amount = db.Column(db.String(100), nullable=True)
+    execution_year = db.Column(db.Integer, nullable=True)  # Año de ejecución; ordena los proyectos públicos
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -37,6 +38,7 @@ class PostEntity(db.Model):
             'associated_partner': self.associated_partner,
             'competitive_fund': self.competitive_fund,
             'investment_amount': self.investment_amount,
+            'execution_year': self.execution_year,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
@@ -59,6 +61,7 @@ class Post:
     associated_partner: Optional[str] = None
     competitive_fund: Optional[str] = None
     investment_amount: Optional[str] = None
+    execution_year: Optional[int] = None
 
     def to_json(self):
         return {
@@ -76,7 +79,8 @@ class Post:
             'executing_company': self.executing_company,
             'associated_partner': self.associated_partner,
             'competitive_fund': self.competitive_fund,
-            'investment_amount': self.investment_amount
+            'investment_amount': self.investment_amount,
+            'execution_year': self.execution_year
         }
 
 class PostMonth():

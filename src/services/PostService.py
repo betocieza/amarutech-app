@@ -12,8 +12,16 @@ from src.models.PostEntity import Post, PostCategory, PostMonth
 
 
 class PostService():
+    # Orden público de proyectos: año de ejecución más reciente primero (sin año al final);
+    # a igual año, el último registrado. post_id desempata para que la paginación sea estable.
+    PROJECT_ORDER = (
+        PostEntity.execution_year.desc().nullslast(),
+        PostEntity.created_at.desc(),
+        PostEntity.post_id.desc(),
+    )
+
 # Methods for front web
- 
+
     @classmethod
     def get_list_posts(cls, limit=6):
         try:
@@ -22,7 +30,7 @@ class PostService():
             post_entities = PostEntity.query.filter_by(
                 published=True,
                 category_id=1
-            ).order_by(PostEntity.created_at.desc()).limit(limit).all()
+            ).order_by(*cls.PROJECT_ORDER).limit(limit).all()
             
             for post_entity in post_entities:
                 # Manejar tags como lista JSON
@@ -48,7 +56,8 @@ class PostService():
                     executing_company=post_entity.executing_company,
                     associated_partner=post_entity.associated_partner,
                     competitive_fund=post_entity.competitive_fund,
-                    investment_amount=post_entity.investment_amount
+                    investment_amount=post_entity.investment_amount,
+                    execution_year=post_entity.execution_year
                 )
                 posts.append(post.to_json())
             return posts
@@ -66,7 +75,7 @@ class PostService():
             post_entities = PostEntity.query.filter_by(
                 published=True, 
                 category_id=2
-            ).order_by(PostEntity.created_at.desc()).limit(4).all()
+            ).order_by(PostEntity.created_at.desc(), PostEntity.post_id.desc()).limit(4).all()
             
             for post_entity in post_entities:
                 # Manejar tags como lista JSON
@@ -92,7 +101,8 @@ class PostService():
                     executing_company=post_entity.executing_company,
                     associated_partner=post_entity.associated_partner,
                     competitive_fund=post_entity.competitive_fund,
-                    investment_amount=post_entity.investment_amount
+                    investment_amount=post_entity.investment_amount,
+                    execution_year=post_entity.execution_year
                 )
                 posts.append(post.to_json())
             return posts
@@ -110,7 +120,7 @@ class PostService():
             pagination = PostEntity.query.filter_by(
                 published=True,
                 category_id=1
-            ).order_by(PostEntity.created_at.desc()).paginate(
+            ).order_by(*cls.PROJECT_ORDER).paginate(
                 page=page,
                 per_page=per_page,
                 error_out=False
@@ -140,7 +150,8 @@ class PostService():
                     executing_company=post_entity.executing_company,
                     associated_partner=post_entity.associated_partner,
                     competitive_fund=post_entity.competitive_fund,
-                    investment_amount=post_entity.investment_amount
+                    investment_amount=post_entity.investment_amount,
+                    execution_year=post_entity.execution_year
                 )
                 posts.append(post.to_json())
 
@@ -255,7 +266,7 @@ class PostService():
             per_page = max(1, min(100, int(per_page))) if per_page else 10  # Límite máximo de 100 por página
             
             # Usar SQLAlchemy ORM con paginación
-            pagination = PostEntity.query.order_by(PostEntity.created_at.desc()).paginate(
+            pagination = PostEntity.query.order_by(PostEntity.created_at.desc(), PostEntity.post_id.desc()).paginate(
                 page=page,
                 per_page=per_page,
                 error_out=False
@@ -287,7 +298,8 @@ class PostService():
                     executing_company=post_entity.executing_company,
                     associated_partner=post_entity.associated_partner,
                     competitive_fund=post_entity.competitive_fund,
-                    investment_amount=post_entity.investment_amount
+                    investment_amount=post_entity.investment_amount,
+                    execution_year=post_entity.execution_year
                 )
                 posts.append(post.to_json())
             
@@ -385,7 +397,8 @@ class PostService():
                 executing_company=post.executing_company,
                 associated_partner=post.associated_partner,
                 competitive_fund=post.competitive_fund,
-                investment_amount=post.investment_amount
+                investment_amount=post.investment_amount,
+                execution_year=post.execution_year
             )
             db.session.add(new_post)
             db.session.commit()
@@ -437,6 +450,7 @@ class PostService():
             post_entity.associated_partner = post.associated_partner
             post_entity.competitive_fund = post.competitive_fund
             post_entity.investment_amount = post.investment_amount
+            post_entity.execution_year = post.execution_year
 
             # Solo actualizar image_url si se proporciona
             if hasattr(post, 'image_url') and post.image_url is not None:
