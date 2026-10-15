@@ -5510,3 +5510,24 @@ jwt.exceptions.DecodeError: Not enough segments
 OSError: conexión rechazada
 
 2026-10-06 19:15:12 | INFO | GET /
+2026-10-13 22:04:09 | INFO | GET /
+2026-10-14 22:07:13 | ERROR | Error enviando email: (535, b'5.7.8 Authentication Failed')
+2026-10-14 22:07:13 | ERROR | Traceback (most recent call last):
+  File "C:\Users\AMARUTECH\Documents\apps\amarutech\amarutech-app\src\utils\Mailer.py", line 123, in _send
+    server.login(cls.user, cls.password)
+  File "C:\Users\AMARUTECH\AppData\Local\Programs\Python\Python312\Lib\smtplib.py", line 750, in login
+    raise last_exception
+  File "C:\Users\AMARUTECH\AppData\Local\Programs\Python\Python312\Lib\smtplib.py", line 739, in login
+    (code, resp) = self.auth(
+                   ^^^^^^^^^^
+  File "C:\Users\AMARUTECH\AppData\Local\Programs\Python\Python312\Lib\smtplib.py", line 662, in auth
+    raise SMTPAuthenticationError(code, resp)
+smtplib.SMTPAuthenticationError: (535, b'5.7.8 Authentication Failed')
+
+2026-10-14 22:07:13 | ERROR | No se pudo enviar el email de reseteo a betocieza@gmail.com
+2026-10-14 22:07:13 | INFO | Solicitud de reseteo de contraseña para: betocieza@gmail.com
+2026-10-14 22:22:38 | INFO | Login exitoso para usuario: admin
+2026-10-14 23:39:03 | INFO | Archivo subido exitosamente: images/21f54c46_buceo.webp
+2026-10-15 09:50:02 | INFO | Login exitoso para usuario: admin
+2026-10-15 09:51:51 | INFO | Archivo subido exitosamente: images/46f3278d_eyediagnose.webp
+2026-10-15 09:51:51 | INFO | Producto creado: EYEDIAGNOSE
