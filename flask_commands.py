@@ -24,6 +24,7 @@ from src.models.UserEntity import UserEntity
 from src.models.PostEntity import PostEntity
 from src.models.CategoryEntity import CategoryEntity
 from src.models.SliderEntity import SliderEntity
+from src.models.ProductEntity import ProductEntity
 from src.models.FaqEntity import FaqEntity
 from src.models.UnitEntity import UnitEntity
 from src.models.TenantEntity import TenantEntity

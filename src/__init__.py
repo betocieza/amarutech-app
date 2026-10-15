@@ -3,7 +3,7 @@ from src.database import db
 from flask_migrate import Migrate
 
 # Routes
-from .controllers import AuthController,IndexController,PostController,CategoryController,SliderController,UserController,FaqController,LogController,UtilityMasterController,UtilityBillingController
+from .controllers import AuthController,IndexController,PostController,CategoryController,SliderController,UserController,FaqController,LogController,UtilityMasterController,UtilityBillingController,ProductController
 app = Flask(__name__)
 migrate = Migrate()
 
@@ -23,7 +23,8 @@ def init_app(config):
     app.register_blueprint(UserController.main, url_prefix='/api/users') 
     app.register_blueprint(PostController.main, url_prefix='/api/posts') 
     app.register_blueprint(CategoryController.main, url_prefix='/api/categories') 
-    app.register_blueprint(SliderController.main, url_prefix='/api/sliders') 
+    app.register_blueprint(SliderController.main, url_prefix='/api/sliders')
+    app.register_blueprint(ProductController.main, url_prefix='/api/products')
     app.register_blueprint(FaqController.main, url_prefix='/api/faqs') 
     app.register_blueprint(LogController.main, url_prefix='/api/logs') 
     app.register_blueprint(UtilityMasterController.main, url_prefix='/api/utilities') 
