@@ -398,6 +398,10 @@ def update_post(post_id):
             # Manejar la imagen - puede venir como archivo nuevo o URL existente
             image_url = request.form.get('image_url', current_post.get('image_url'))
 
+            # remove_image=true quita la imagen actual (la web mostrará no-image.svg)
+            if request.form.get('remove_image', 'false').lower() == 'true':
+                image_url = ''
+
             # Si se envía una nueva imagen, subirla a B2
             if 'image' in request.files and request.files['image'].filename:
                 image_file = request.files['image']

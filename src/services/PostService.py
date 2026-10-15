@@ -452,9 +452,9 @@ class PostService():
             post_entity.investment_amount = post.investment_amount
             post_entity.execution_year = post.execution_year
 
-            # Solo actualizar image_url si se proporciona
+            # Solo actualizar image_url si se proporciona; '' significa quitar la imagen
             if hasattr(post, 'image_url') and post.image_url is not None:
-                post_entity.image_url = post.image_url
+                post_entity.image_url = post.image_url or None
             
             # Solo actualizar user_id si se proporciona y es válido
             if hasattr(post, 'user_id') and post.user_id:
