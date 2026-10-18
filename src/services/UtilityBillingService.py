@@ -202,12 +202,18 @@ class UtilityBillingService():
             return []
 
     @classmethod
-    def get_previous_credit(cls, unit_id, period):
-        """Saldo a favor que dejo la unidad en el periodo anterior."""
+    def get_previous_credit(cls, tenant_id, period):
+        """Saldo a favor que dejo el inquilino en el periodo anterior.
+
+        El saldo es del inquilino, no del departamento: si entra uno nuevo, sus
+        servicios arrancan de cero y no hereda lo que pago de mas el anterior.
+        """
+        if not tenant_id:
+            return ZERO
         try:
             prev = UnitChargeEntity.query.filter_by(
-                unit_id=unit_id, period=previous_period(period)).first()
-            return (prev.credit_balance or ZERO) if prev else ZERO
+                tenant_id=tenant_id, period=previous_period(period)).all()
+            return money(sum((c.credit_balance or ZERO for c in prev), ZERO))
         except Exception as ex:
             Logger.add_to_log("error", str(ex))
             Logger.add_to_log("error", traceback.format_exc())
@@ -281,7 +287,8 @@ class UtilityBillingService():
                 # Internet: monto fijo pactado con el inquilino
                 i_amount = money(tenant.internet_fee) if tenant else ZERO
 
-                credit = cls.get_previous_credit(unit.unit_id, period)
+                credit = cls.get_previous_credit(
+                    tenant.tenant_id if tenant else None, period)
                 total = money(e_amount + w_amount + i_amount - credit)
 
                 if not charge:

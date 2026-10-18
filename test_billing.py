@@ -306,10 +306,13 @@ def test_common_area():
 def test_payments_and_credit():
     print('\n== pagos, saldo a favor y arrastre ==')
     unit = UnitEntity.query.filter_by(code='301').first()
-    charge = UnitChargeEntity.query.filter_by(unit_id=unit.unit_id, period='2026-02').first()
-    check('existe el cargo del 301 en 2026-02', charge is not None)
+    # Marzo, no febrero: el saldo a favor es del inquilino, y el inquilino del
+    # 301 recien entra en marzo.
+    charge = UnitChargeEntity.query.filter_by(unit_id=unit.unit_id, period='2026-03').first()
+    check('existe el cargo del 301 en 2026-03', charge is not None)
     if not charge:
         return
+    check('el cargo tiene inquilino', charge.tenant_id is not None)
 
     total = charge.total_amount
     # Pago parcial
@@ -330,14 +333,15 @@ def test_payments_and_credit():
           '(saldo %s, esperado %s)' % (charge.credit_balance, excess))
 
     # El saldo a favor debe arrastrarse al periodo siguiente
-    credit = UtilityBillingService.get_previous_credit(unit.unit_id, '2026-03')
+    credit = UtilityBillingService.get_previous_credit(charge.tenant_id, '2026-04')
     check('el saldo a favor se arrastra al periodo siguiente',
           abs(credit - excess) <= Decimal('0.01'),
           '(arrastrado %s, esperado %s)' % (credit, excess))
 
     # Y debe aplicarse al regenerar
-    UtilityBillingService.generate_period('2026-03')
-    next_charge = UtilityBillingService.get_charges(period='2026-03', unit_id=unit.unit_id)
+    UtilityBillingService.generate_period('2026-04')
+    next_charge = UtilityBillingService.get_charges(period='2026-04', unit_id=unit.unit_id)
+    check('existe el cargo siguiente del 301', bool(next_charge))
     if next_charge:
         applied = Decimal(str(next_charge[0]['previous_credit']))
         check('el cargo siguiente aplica el saldo a favor',
@@ -350,6 +354,17 @@ def test_payments_and_credit():
         check('total = luz + agua + internet - saldo a favor',
               Decimal(str(c['total_amount'])) == expected,
               '(obtenido %s, esperado %s)' % (c['total_amount'], expected))
+
+    # El saldo es del inquilino: uno nuevo en el mismo departamento arranca de
+    # cero y no hereda lo que pago de mas el anterior.
+    check('sin inquilino no hay saldo a favor',
+          UtilityBillingService.get_previous_credit(None, '2026-04') == Decimal('0'))
+    otro = (TenantEntity.query
+            .filter(TenantEntity.tenant_id != charge.tenant_id).first())
+    if otro:
+        check('otro inquilino no hereda el saldo a favor',
+              UtilityBillingService.get_previous_credit(otro.tenant_id, '2026-04')
+              == Decimal('0'))
 
 
 def test_payment_deletion():
